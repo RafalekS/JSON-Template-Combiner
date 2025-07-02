@@ -1,0 +1,88 @@
+{
+  "version": "2",
+  "templates": [
+    {
+      "title": "Nginx",
+      "description": "High performance web server",
+      "image": "nginx:latest",
+      "categories": ["webserver"],
+      "platform": "linux",
+      "restart_policy": "unless-stopped",
+      "ports": [
+        {
+          "WebUI": "80/tcp"
+        }
+      ],
+      "volumes": [
+        {
+          "container": "/usr/share/nginx/html",
+          "bind": "!data/nginx"
+        }
+      ],
+      "env": [
+        {
+          "name": "NGINX_HOST",
+          "label": "Hostname",
+          "description": "Hostname for nginx server",
+          "default": "localhost"
+        }
+      ]
+    },
+    {
+      "title": "Apache httpd",
+      "description": "The Apache HTTP Server",
+      "image": "httpd:latest",
+      "categories": ["webserver"],
+      "platform": "linux",
+      "restart_policy": "unless-stopped",
+      "ports": [
+        {
+          "WebUI": "80/tcp"
+        }
+      ],
+      "volumes": [
+        {
+          "container": "/usr/local/apache2/htdocs/",
+          "bind": "!data/httpd"
+        }
+      ]
+    },
+    {
+      "title": "Node.js",
+      "description": "JavaScript runtime built on Chrome's V8 JavaScript engine",
+      "image": "node:18-alpine",
+      "categories": ["development"],
+      "platform": "linux",
+      "restart_policy": "unless-stopped",
+      "ports": [
+        {
+          "App": "3000/tcp"
+        }
+      ],
+      "volumes": [
+        {
+          "container": "/app",
+          "bind": "!data/nodejs"
+        }
+      ],
+      "env": [
+        {
+          "name": "NODE_ENV",
+          "label": "Environment",
+          "description": "Node.js environment",
+          "default": "production",
+          "select": [
+            {
+              "text": "Development",
+              "value": "development"
+            },
+            {
+              "text": "Production",
+              "value": "production"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

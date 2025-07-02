@@ -1,0 +1,23 @@
+{
+  "default_sources": {
+    "urls": [
+      "https://templates-portainer.ibaraki.app",
+      "https://raw.githubusercontent.com/qnap-dev/container-apps/refs/heads/2.0/ai.json",
+      "https://raw.githubusercontent.com/qnap-dev/container-apps/refs/heads/2.0/list.json",
+      "https://raw.githubusercontent.com/qnap-dev/container-apps/refs/heads/2.0/iot.json"
+    ],
+    "files": []
+  },
+  "settings": {
+    "similarity_threshold": 0.7,
+    "request_timeout": 30,
+    "default_output_filename": "templates.json",
+    "auto_detect_architecture": true,
+    "preserve_source_order": false
+  },
+  "ui_settings": {
+    "theme": "System",
+    "color_theme": "blue",
+    "window_size": "900x700"
+  }
+}
