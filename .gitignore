@@ -27,6 +27,8 @@ venv/
 commit_to_git.ps1
 commit_to_git.cmd
 simple_commit.cmd
+push_to_github.ps1
+github_setup.md
 
 # IDE and editor files
 .vscode/
