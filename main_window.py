@@ -278,7 +278,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         # Load UI from file
-        ui_path = os.path.join(os.path.dirname(__file__), 'main_window_pyqt6.ui')
+        ui_path = os.path.join(os.path.dirname(__file__), 'config', 'main_window_pyqt6.ui')
         uic.loadUi(ui_path, self)
 
         # Data storage
