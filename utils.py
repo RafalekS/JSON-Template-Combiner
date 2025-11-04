@@ -5,15 +5,20 @@ Utility functions for JSON Template Combiner
 import json
 import os
 import requests
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from urllib.parse import urlparse
+import yaml
 
 
 class ConfigManager:
     """Manages application configuration"""
     
-    def __init__(self, config_file: str = "config.json"):
+    def __init__(self, config_file: str = "config/config.json"):
         self.config_file = config_file
+        # Ensure config directory exists
+        config_dir = os.path.dirname(self.config_file)
+        if config_dir and not os.path.exists(config_dir):
+            os.makedirs(config_dir, exist_ok=True)
         self.config = self.load_config()
     
     def load_config(self) -> Dict[str, Any]:
@@ -31,6 +36,11 @@ class ConfigManager:
     def save_config(self) -> bool:
         """Save configuration to file"""
         try:
+            # Ensure config directory exists
+            config_dir = os.path.dirname(self.config_file)
+            if config_dir and not os.path.exists(config_dir):
+                os.makedirs(config_dir, exist_ok=True)
+            
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.config, f, indent=2, ensure_ascii=False)
             return True
@@ -94,8 +104,11 @@ class TemplateConverter:
     def detect_format(data: Any) -> str:
         """Detect the format of the JSON data"""
         if isinstance(data, dict):
+            # Check for Docker Compose format
+            if DockerComposeConverter.is_docker_compose_data(data):
+                return 'docker_compose'
             # Check for Portainer format
-            if 'templates' in data and 'version' in data:
+            elif 'templates' in data and 'version' in data:
                 return 'portainer'
             # Check for single template
             elif 'title' in data or 'image' in data:
@@ -129,6 +142,8 @@ class TemplateConverter:
             return {"version": "2", "templates": [data]}
         elif format_type == 'portainer_array':
             return {"version": "2", "templates": data}
+        elif format_type == 'docker_compose':
+            return DockerComposeConverter.convert_compose_to_portainer(data)
         elif format_type == 'qnap_single':
             converted = TemplateConverter._convert_qnap_template(data)
             return {"version": "2", "templates": [converted]}
@@ -199,6 +214,270 @@ class TemplateConverter:
             }
         
         return portainer_template
+
+
+class DockerComposeConverter:
+    """Converts Docker Compose YAML files to Portainer template format"""
+    
+    @staticmethod
+    def is_docker_compose_file(file_path: str) -> bool:
+        """Check if file is a Docker Compose file based on extension and content"""
+        if not file_path.lower().endswith(('.yml', '.yaml')):
+            return False
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = yaml.safe_load(f)
+                
+            # Check for Docker Compose indicators
+            if isinstance(content, dict):
+                # Check for version field or services field (common in docker-compose files)
+                has_version = 'version' in content
+                has_services = 'services' in content
+                has_compose_fields = any(key in content for key in ['services', 'networks', 'volumes'])
+                
+                return has_services or (has_version and has_compose_fields)
+        except:
+            pass
+        
+        return False
+    
+    @staticmethod
+    def is_docker_compose_data(data: Any) -> bool:
+        """Check if data structure looks like Docker Compose"""
+        if not isinstance(data, dict):
+            return False
+        
+        # Check for Docker Compose structure
+        has_services = 'services' in data and isinstance(data['services'], dict)
+        has_version = 'version' in data
+        has_compose_fields = any(key in data for key in ['services', 'networks', 'volumes'])
+        
+        return has_services or (has_version and has_compose_fields)
+    
+    @staticmethod
+    def convert_compose_to_portainer(compose_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert Docker Compose data to Portainer template format"""
+        if not isinstance(compose_data, dict) or 'services' not in compose_data:
+            raise ValueError("Invalid Docker Compose format: missing 'services' section")
+        
+        templates = []
+        services = compose_data['services']
+        
+        if not isinstance(services, dict):
+            raise ValueError("Invalid Docker Compose format: 'services' must be a dictionary")
+        
+        for service_name, service_config in services.items():
+            if not isinstance(service_config, dict):
+                continue
+            
+            template = DockerComposeConverter._convert_service_to_template(service_name, service_config)
+            if template:
+                templates.append(template)
+        
+        return {
+            "version": "2",
+            "templates": templates
+        }
+    
+    @staticmethod
+    def _convert_service_to_template(service_name: str, service_config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Convert a single Docker Compose service to Portainer template"""
+        if 'image' not in service_config:
+            # Skip services without image (like build-only services)
+            return None
+        
+        template = {
+            "title": service_config.get('container_name', service_name).replace('_', ' ').title(),
+            "image": service_config['image'],
+            "platform": "linux",
+            "restart_policy": DockerComposeConverter._map_restart_policy(service_config.get('restart', 'no'))
+        }
+        
+        # Add description if available
+        if 'labels' in service_config and isinstance(service_config['labels'], dict):
+            description = service_config['labels'].get('description', 
+                         service_config['labels'].get('traefik.frontend.rule', ''))
+            if description:
+                template['description'] = description
+        
+        if not template.get('description'):
+            template['description'] = f"Container service: {service_name}"
+        
+        # Convert environment variables
+        env_vars = DockerComposeConverter._convert_environment(service_config.get('environment', []))
+        if env_vars:
+            template['env'] = env_vars
+        
+        # Convert ports
+        ports = DockerComposeConverter._convert_ports(service_config.get('ports', []))
+        if ports:
+            template['ports'] = ports
+        
+        # Convert volumes
+        volumes = DockerComposeConverter._convert_volumes(service_config.get('volumes', []))
+        if volumes:
+            template['volumes'] = volumes
+        
+        # Add categories based on service name or image
+        categories = DockerComposeConverter._detect_categories(service_name, service_config['image'])
+        if categories:
+            template['categories'] = categories
+        
+        # Add labels as note if present
+        if 'labels' in service_config and isinstance(service_config['labels'], dict):
+            notes = []
+            for key, value in service_config['labels'].items():
+                if key not in ['description']:  # Skip description as it's already used
+                    notes.append(f"{key}: {value}")
+            if notes:
+                template['note'] = "Docker Compose labels: " + "; ".join(notes[:3])  # Limit to first 3
+        
+        return template
+    
+    @staticmethod
+    def _map_restart_policy(restart: str) -> str:
+        """Map Docker Compose restart policy to Portainer format"""
+        restart_mapping = {
+            'no': 'no',
+            'always': 'always',
+            'on-failure': 'on-failure',
+            'unless-stopped': 'unless-stopped'
+        }
+        return restart_mapping.get(restart, 'unless-stopped')
+    
+    @staticmethod
+    def _convert_environment(environment: Any) -> List[Dict[str, str]]:
+        """Convert Docker Compose environment to Portainer format"""
+        env_vars = []
+        
+        if isinstance(environment, list):
+            for env in environment:
+                if isinstance(env, str):
+                    if '=' in env:
+                        name, value = env.split('=', 1)
+                        env_vars.append({"name": name, "default": value})
+                    else:
+                        env_vars.append({"name": env})
+        elif isinstance(environment, dict):
+            for name, value in environment.items():
+                if value is not None:
+                    env_vars.append({"name": name, "default": str(value)})
+                else:
+                    env_vars.append({"name": name})
+        
+        return env_vars
+    
+    @staticmethod
+    def _convert_ports(ports: List) -> List[Dict[str, str]]:
+        """Convert Docker Compose ports to Portainer format"""
+        port_mappings = []
+        
+        for port in ports:
+            if isinstance(port, str):
+                # Handle "host:container" or "container" format
+                if ':' in port:
+                    host_port, container_port = port.split(':', 1)
+                    # Handle protocol suffix
+                    if '/' in container_port:
+                        container_port, protocol = container_port.split('/')
+                        port_str = f"{container_port}/{protocol}"
+                    else:
+                        port_str = f"{container_port}/tcp"
+                    
+                    label = f"Port {container_port}"
+                else:
+                    port_str = f"{port}/tcp"
+                    label = f"Port {port}"
+                
+                port_mappings.append({label: port_str})
+            elif isinstance(port, dict):
+                # Handle expanded port format
+                target = port.get('target', '')
+                published = port.get('published', target)
+                protocol = port.get('protocol', 'tcp')
+                
+                if target:
+                    port_str = f"{target}/{protocol}"
+                    label = f"Port {target}"
+                    port_mappings.append({label: port_str})
+        
+        return port_mappings
+    
+    @staticmethod
+    def _convert_volumes(volumes: List) -> List[Dict[str, str]]:
+        """Convert Docker Compose volumes to Portainer format"""
+        volume_mappings = []
+        
+        for volume in volumes:
+            if isinstance(volume, str):
+                # Handle "host:container" or "host:container:mode" format
+                if ':' in volume:
+                    parts = volume.split(':')
+                    host_path = parts[0]
+                    container_path = parts[1]
+                    
+                    # Convert relative paths and named volumes
+                    if not host_path.startswith('/') and not host_path.startswith('.'):
+                        # Probably a named volume
+                        host_path = f"!data/{host_path}"
+                    elif host_path.startswith('./'):
+                        # Relative path
+                        host_path = f"!data/{host_path[2:]}"
+                    
+                    volume_mappings.append({
+                        "container": container_path,
+                        "bind": host_path
+                    })
+            elif isinstance(volume, dict):
+                # Handle expanded volume format
+                source = volume.get('source', '')
+                target = volume.get('target', '')
+                
+                if source and target:
+                    # Handle named volumes
+                    if not source.startswith('/') and not source.startswith('.'):
+                        source = f"!data/{source}"
+                    
+                    volume_mappings.append({
+                        "container": target,
+                        "bind": source
+                    })
+        
+        return volume_mappings
+    
+    @staticmethod
+    def _detect_categories(service_name: str, image: str) -> List[str]:
+        """Detect categories based on service name and image"""
+        categories = []
+        
+        # Common service patterns
+        service_patterns = {
+            'database': ['mysql', 'postgres', 'mongodb', 'redis', 'mariadb', 'sqlite'],
+            'webserver': ['nginx', 'apache', 'httpd', 'caddy'],
+            'media': ['plex', 'jellyfin', 'emby', 'sonarr', 'radarr'],
+            'networking': ['traefik', 'nginx-proxy', 'haproxy'],
+            'monitoring': ['prometheus', 'grafana', 'influxdb', 'telegraf'],
+            'development': ['node', 'python', 'php', 'ruby'],
+            'storage': ['nextcloud', 'owncloud', 'seafile'],
+            'communication': ['rocketchat', 'mattermost', 'discord'],
+            'security': ['vault', 'keycloak', 'authelia']
+        }
+        
+        service_lower = service_name.lower()
+        image_lower = image.lower()
+        
+        for category, keywords in service_patterns.items():
+            for keyword in keywords:
+                if keyword in service_lower or keyword in image_lower:
+                    categories.append(category)
+                    break
+        
+        # Default category if none detected
+        if not categories:
+            categories.append('tools')
+        
+        return categories
 
 
 class JSONValidator:
