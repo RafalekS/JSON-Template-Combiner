@@ -8,9 +8,10 @@ from PyQt6.QtWidgets import (
     QMainWindow, QFileDialog, QMessageBox, QListWidgetItem,
     QInputDialog, QDialog, QVBoxLayout, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QTextEdit, QCheckBox, QComboBox,
-    QGroupBox, QFormLayout, QScrollArea, QWidget
+    QGroupBox, QFormLayout, QScrollArea, QWidget, QMenu
 )
 from PyQt6.QtCore import QThread, pyqtSignal, Qt
+from PyQt6.QtGui import QAction
 from PyQt6 import uic
 import requests
 import json
@@ -19,7 +20,7 @@ import difflib
 import threading
 from typing import List, Dict, Any, Tuple
 from datetime import datetime
-from utils import TemplateConverter, JSONValidator, ConfigManager
+from utils import TemplateConverter, JSONValidator, ConfigManager, ThemeManager
 
 
 class TemplateComparator:
@@ -299,6 +300,9 @@ class MainWindow(QMainWindow):
         # Configuration
         self.config = ConfigManager()
 
+        # Theme management
+        self.theme_manager = ThemeManager()
+
         # Initialize base template from configuration
         self.base_template_enabled = self.config.get('base_template.enabled', True)
         self.base_template_url = self.config.get('base_template.url', 'https://templates-portainer.ibaraki.app')
@@ -307,6 +311,10 @@ class MainWindow(QMainWindow):
         # Set base template values in UI
         self.baseTemplateEnabledCheckBox.setChecked(self.base_template_enabled)
         self.baseTemplateUrlLineEdit.setText(self.base_template_url)
+
+        # Setup menu bar and theme
+        self.setup_menu_bar()
+        self.apply_saved_theme()
 
         # Connect signals
         self.setup_connections()
@@ -374,6 +382,59 @@ class MainWindow(QMainWindow):
         # Save tab
         self.browseButton.clicked.connect(self.browse_save_location)
         self.saveButton.clicked.connect(self.save_template)
+
+    def setup_menu_bar(self):
+        """Setup menu bar with theme options"""
+        menubar = self.menuBar()
+
+        # View menu
+        view_menu = menubar.addMenu("&View")
+
+        # Theme submenu
+        theme_menu = QMenu("&Theme", self)
+        view_menu.addMenu(theme_menu)
+
+        # Create theme actions
+        self.theme_actions = {}
+        for theme_name in self.theme_manager.get_available_themes():
+            action = QAction(theme_name.capitalize(), self)
+            action.setCheckable(True)
+            action.triggered.connect(lambda checked, t=theme_name: self.change_theme(t))
+            theme_menu.addAction(action)
+            self.theme_actions[theme_name] = action
+
+    def apply_saved_theme(self):
+        """Apply the saved theme from configuration"""
+        saved_theme = self.config.get('ui_settings.theme', 'dark')
+
+        # Ensure saved theme is valid
+        if saved_theme not in self.theme_manager.get_available_themes():
+            saved_theme = self.theme_manager.DEFAULT_THEME
+
+        # Apply the theme
+        self.change_theme(saved_theme)
+
+    def change_theme(self, theme_name: str):
+        """Change application theme"""
+        app = self.window().parent()
+        if app is None:
+            # Get QApplication instance
+            from PyQt6.QtWidgets import QApplication
+            app = QApplication.instance()
+
+        if self.theme_manager.apply_theme(app, theme_name):
+            # Update config
+            self.config.set('ui_settings.theme', theme_name)
+            self.config.save_config()
+
+            # Update menu checkmarks
+            for name, action in self.theme_actions.items():
+                action.setChecked(name == theme_name)
+
+            self.update_status(f"Theme changed to: {theme_name}")
+        else:
+            self.update_status(f"Failed to apply theme: {theme_name}")
+            QMessageBox.warning(self, "Theme Error", f"Could not apply theme: {theme_name}")
 
     # ========== SOURCES TAB METHODS ==========
 

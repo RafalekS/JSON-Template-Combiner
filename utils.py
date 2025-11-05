@@ -694,3 +694,82 @@ class TemplateUtils:
             score -= 20
         
         return max(score, 0)  # Ensure non-negative score
+
+
+class ThemeManager:
+    """Manages application themes and styling"""
+
+    AVAILABLE_THEMES = ['dark', 'light']
+    DEFAULT_THEME = 'dark'
+
+    def __init__(self, themes_dir: str = "themes"):
+        self.themes_dir = themes_dir
+        self.current_theme = self.DEFAULT_THEME
+
+    def get_available_themes(self) -> List[str]:
+        """Get list of available theme names"""
+        return self.AVAILABLE_THEMES.copy()
+
+    def load_theme(self, theme_name: str) -> Optional[str]:
+        """
+        Load theme QSS content from file
+
+        Args:
+            theme_name: Name of the theme (e.g., 'dark', 'light')
+
+        Returns:
+            QSS stylesheet content as string, or None if theme not found
+        """
+        if theme_name not in self.AVAILABLE_THEMES:
+            print(f"Warning: Theme '{theme_name}' not available, using '{self.DEFAULT_THEME}'")
+            theme_name = self.DEFAULT_THEME
+
+        theme_file = os.path.join(self.themes_dir, f"{theme_name}.qss")
+
+        try:
+            if os.path.exists(theme_file):
+                with open(theme_file, 'r', encoding='utf-8') as f:
+                    return f.read()
+            else:
+                print(f"Warning: Theme file not found: {theme_file}")
+                return None
+        except Exception as e:
+            print(f"Error loading theme '{theme_name}': {e}")
+            return None
+
+    def apply_theme(self, app, theme_name: str) -> bool:
+        """
+        Apply theme to PyQt6 application
+
+        Args:
+            app: QApplication instance
+            theme_name: Name of the theme to apply
+
+        Returns:
+            True if theme was applied successfully, False otherwise
+        """
+        stylesheet = self.load_theme(theme_name)
+
+        if stylesheet:
+            try:
+                app.setStyleSheet(stylesheet)
+                self.current_theme = theme_name
+                return True
+            except Exception as e:
+                print(f"Error applying theme: {e}")
+                return False
+
+        return False
+
+    def get_current_theme(self) -> str:
+        """Get name of currently applied theme"""
+        return self.current_theme
+
+    @staticmethod
+    def get_theme_description(theme_name: str) -> str:
+        """Get human-readable description of theme"""
+        descriptions = {
+            'dark': 'Dark theme with blue accents (VS Code inspired)',
+            'light': 'Light theme with blue accents (Modern Windows style)'
+        }
+        return descriptions.get(theme_name, 'Unknown theme')

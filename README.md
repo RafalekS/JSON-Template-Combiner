@@ -282,6 +282,32 @@ Configuration files are stored in the `config/` directory:
 - **example_output.json**: Example output format reference
 - **main_window_pyqt6.ui**: Qt Designer UI definition (XML)
 
+### Theming
+
+The application includes a professional theming system with multiple color schemes:
+
+**Available Themes:**
+- **Dark Theme**: VS Code-inspired dark theme with blue accents (default)
+- **Light Theme**: Modern Windows-style light theme with blue accents
+
+**Changing Themes:**
+1. Open the application
+2. Click **View** → **Theme** in the menu bar
+3. Select your preferred theme (Dark or Light)
+4. Theme choice is automatically saved and persists across sessions
+
+**Theme Files:**
+Themes are stored as QSS (Qt Style Sheets) files in the `themes/` directory:
+- `themes/dark.qss` - Dark theme stylesheet
+- `themes/light.qss` - Light theme stylesheet
+
+**Creating Custom Themes:**
+You can create your own themes by:
+1. Copying an existing `.qss` file in the `themes/` directory
+2. Modifying colors, fonts, and styling using QSS syntax (similar to CSS)
+3. Saving with a new name (e.g., `custom.qss`)
+4. Adding the theme name to `ThemeManager.AVAILABLE_THEMES` in `utils.py`
+
 ### Customizing the Interface
 
 The GUI is defined in `config/main_window_pyqt6.ui` and can be edited with:
