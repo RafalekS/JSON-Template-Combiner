@@ -479,6 +479,47 @@ Console output includes:
 3. Update `config/main_window_pyqt6.ui` if needed
 4. Test thoroughly with various template sources
 
+### Theme Editor Tool
+
+The project includes a **Visual Theme Editor** for creating and modifying themes without manually editing QSS code.
+
+**Running the Theme Editor:**
+```bash
+python theme_editor.py
+```
+
+**Features:**
+- **Visual Color Scheme Editor**: Click color buttons to choose colors with a color picker
+- **Live Preview**: See your theme applied to sample widgets in real-time
+- **QSS Code Editor**: View and edit the raw QSS code directly
+- **Load/Save**: Open existing themes or create new ones
+- **Auto-Generate**: Generate complete QSS from your color choices
+
+**How to Use:**
+1. Run `python theme_editor.py`
+2. Load an existing theme from the dropdown (dark or light)
+3. **Option A - Visual Editing:**
+   - Click color buttons to change colors (Background, Primary, Border, etc.)
+   - Click "Generate QSS from Colors" to create stylesheet
+   - Click "Apply to Preview" to see changes in the preview panel
+4. **Option B - Code Editing:**
+   - Edit the QSS code directly in the text editor
+   - Click "Apply to Preview" to see changes
+5. Save your theme with File → Save or Save As
+
+**Creating New Themes:**
+1. Click "New Theme" button
+2. Edit colors or QSS code
+3. Save with a descriptive name (e.g., `my_theme.qss`)
+4. Add theme name to `ThemeManager.AVAILABLE_THEMES` in `utils.py`
+5. Restart the main application to use your new theme
+
+**Tips:**
+- Start by loading an existing theme (dark or light) as a base
+- Use the color picker for consistent color schemes
+- Test your theme in the preview panel before saving
+- QSS syntax is similar to CSS for web pages
+
 ## Contributing
 
 Contributions are welcome! Please:
