@@ -1,0 +1,1022 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1400</width>
+    <height>1000</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>JSON Template Combiner</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+
+      <!-- TAB 1: SOURCES -->
+      <widget class="QWidget" name="sourcesTab">
+       <attribute name="title">
+        <string>Sources</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="sourcesLayout">
+        <item>
+         <widget class="QGroupBox" name="urlSourcesGroup">
+          <property name="title">
+           <string>URL Sources</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <item>
+            <layout class="QHBoxLayout">
+             <item>
+              <widget class="QLineEdit" name="urlLineEdit">
+               <property name="placeholderText">
+                <string>Enter JSON URL...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addUrlButton">
+               <property name="text">
+                <string>Add URL</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QListWidget" name="urlListWidget">
+             <property name="minimumHeight">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="removeUrlButton">
+             <property name="text">
+              <string>Remove Selected URL</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="fileSourcesGroup">
+          <property name="title">
+           <string>Local File Sources</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <item>
+            <widget class="QPushButton" name="addFileButton">
+             <property name="text">
+              <string>Add Template File (JSON/YAML/Compose)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QListWidget" name="fileListWidget">
+             <property name="minimumHeight">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="removeFileButton">
+             <property name="text">
+              <string>Remove Selected File</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="baseTemplateGroup">
+          <property name="title">
+           <string>Base Template Configuration</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <item>
+            <widget class="QCheckBox" name="baseTemplateEnabledCheckBox">
+             <property name="text">
+              <string>Enable base template</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout">
+             <item>
+              <widget class="QLineEdit" name="baseTemplateUrlLineEdit">
+               <property name="text">
+                <string>https://templates-portainer.ibaraki.app</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="updateBaseTemplateButton">
+               <property name="text">
+                <string>Update</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="clearBaseTemplateButton">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="processButton">
+          <property name="text">
+           <string>Load &amp; Process Sources →</string>
+          </property>
+          <property name="minimumHeight">
+           <number>40</number>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="progressBar">
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="statusLabel">
+          <property name="text">
+           <string>Ready</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- TAB 2: MANUAL ENTRY -->
+      <widget class="QWidget" name="manualEntryTab">
+       <attribute name="title">
+        <string>Manual Entry</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="manualEntryLayout">
+        <item>
+         <widget class="QScrollArea" name="manualEntryScrollLeft">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetLeft">
+           <layout class="QVBoxLayout" name="leftPanelLayout">
+            <item>
+             <widget class="QLabel" name="manualEntryTitle">
+              <property name="text">
+               <string>Create Template Manually</string>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>14</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="basicInfoGroup">
+              <property name="title">
+               <string>Basic Information</string>
+              </property>
+              <layout class="QFormLayout">
+               <item row="0" column="0">
+                <widget class="QLabel" name="titleLabel">
+                 <property name="text">
+                  <string>Title*:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="manualTitleLineEdit">
+                 <property name="placeholderText">
+                  <string>e.g., Nginx Web Server</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="imageLabel">
+                 <property name="text">
+                  <string>Image*:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="manualImageLineEdit">
+                 <property name="placeholderText">
+                  <string>e.g., nginx:latest</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="descriptionLabel">
+                 <property name="text">
+                  <string>Description:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLineEdit" name="manualDescriptionLineEdit">
+                 <property name="placeholderText">
+                  <string>Brief description</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="logoLabel">
+                 <property name="text">
+                  <string>Logo URL:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QLineEdit" name="manualLogoLineEdit">
+                 <property name="placeholderText">
+                  <string>https://example.com/logo.png</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="platformLabel">
+                 <property name="text">
+                  <string>Platform:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QComboBox" name="manualPlatformComboBox">
+                 <item>
+                  <property name="text">
+                   <string>linux</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>windows</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="restartLabel">
+                 <property name="text">
+                  <string>Restart Policy:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QComboBox" name="manualRestartComboBox">
+                 <item>
+                  <property name="text">
+                   <string>unless-stopped</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>always</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>no</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>on-failure</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="noteLabel">
+                 <property name="text">
+                  <string>Note:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="1">
+                <widget class="QTextEdit" name="manualNoteTextEdit">
+                 <property name="minimumHeight">
+                  <number>150</number>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Enter additional information...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="1">
+                <widget class="QCheckBox" name="manualAdminOnlyCheckBox">
+                 <property name="text">
+                  <string>Administrator Only</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout">
+              <item>
+               <widget class="QPushButton" name="clearFormButton">
+                <property name="text">
+                 <string>Clear Form</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="addManualTemplateButton">
+                <property name="text">
+                 <string>Add Template</string>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+                          <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QScrollArea" name="manualEntryScrollRight">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetRight">
+           <layout class="QVBoxLayout" name="rightPanelLayout">
+            <!-- Categories -->
+            <item>
+             <widget class="QGroupBox" name="categoriesGroup">
+              <property name="title">
+               <string>Categories</string>
+              </property>
+              <layout class="QVBoxLayout">
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QComboBox" name="manualCategoryComboBox">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                   <item><property name="text"><string>Select...</string></property></item>
+                   <item><property name="text"><string>webserver</string></property></item>
+                   <item><property name="text"><string>database</string></property></item>
+                   <item><property name="text"><string>media</string></property></item>
+                   <item><property name="text"><string>networking</string></property></item>
+                   <item><property name="text"><string>tools</string></property></item>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="addCategoryButton">
+                   <property name="text">
+                    <string>Add</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="refreshCategoriesButton">
+                   <property name="text">
+                    <string>🔄</string>
+                   </property>
+                   <property name="maximumWidth">
+                    <number>30</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QListWidget" name="categoriesListWidget">
+                 <property name="maximumHeight">
+                  <number>80</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QPushButton" name="editCategoryButton">
+                   <property name="text">
+                    <string>Edit</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="removeCategoryButton">
+                   <property name="text">
+                    <string>Remove</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <!-- Environment Variables -->
+            <item>
+             <widget class="QGroupBox" name="envVarsGroup">
+              <property name="title">
+               <string>Environment Variables</string>
+              </property>
+              <layout class="QVBoxLayout">
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QLabel" name="envNameLabel">
+                   <property name="text">
+                    <string>Name:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="manualEnvNameLineEdit">
+                   <property name="placeholderText">
+                    <string>VAR_NAME</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="envValueLabel">
+                   <property name="text">
+                    <string>Value:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="manualEnvValueLineEdit">
+                   <property name="placeholderText">
+                    <string>default_value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="addEnvButton">
+                   <property name="text">
+                    <string>Add</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QListWidget" name="envListWidget">
+                 <property name="maximumHeight">
+                  <number>100</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QPushButton" name="editEnvButton">
+                   <property name="text">
+                    <string>Edit</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="removeEnvButton">
+                   <property name="text">
+                    <string>Remove</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <!-- Ports -->
+            <item>
+             <widget class="QGroupBox" name="portsGroup">
+              <property name="title">
+               <string>Ports</string>
+              </property>
+              <layout class="QVBoxLayout">
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QLabel" name="portLabelLabel">
+                   <property name="text">
+                    <string>Label:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="manualPortLabelLineEdit">
+                   <property name="text">
+                    <string>WebUI</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="portNumberLabel">
+                   <property name="text">
+                    <string>Port:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="manualPortNumberLineEdit">
+                   <property name="text">
+                    <string>80/tcp</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="addPortButton">
+                   <property name="text">
+                    <string>Add</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QListWidget" name="portsListWidget">
+                 <property name="maximumHeight">
+                  <number>80</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QPushButton" name="editPortButton">
+                   <property name="text">
+                    <string>Edit</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="removePortButton">
+                   <property name="text">
+                    <string>Remove</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <!-- Volumes -->
+            <item>
+             <widget class="QGroupBox" name="volumesGroup">
+              <property name="title">
+               <string>Volumes</string>
+              </property>
+              <layout class="QVBoxLayout">
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QLabel" name="volumeContainerLabel">
+                   <property name="text">
+                    <string>Container:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="manualVolumeContainerLineEdit">
+                   <property name="placeholderText">
+                    <string>/path/in/container</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="volumeBindLabel">
+                   <property name="text">
+                    <string>Bind:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="manualVolumeBindLineEdit">
+                   <property name="placeholderText">
+                    <string>/host/path</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="addVolumeButton">
+                   <property name="text">
+                    <string>Add</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QListWidget" name="volumesListWidget">
+                 <property name="maximumHeight">
+                  <number>80</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QPushButton" name="editVolumeButton">
+                   <property name="text">
+                    <string>Edit</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="removeVolumeButton">
+                   <property name="text">
+                    <string>Remove</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+                          <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- TAB 3: EDIT TEMPLATES -->
+      <widget class="QWidget" name="editTemplatesTab">
+       <attribute name="title">
+        <string>Edit Templates</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="editTemplatesLayout">
+        <item>
+         <widget class="QLabel" name="editTemplatesTitle">
+          <property name="text">
+           <string>Edit Individual Templates</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="editTemplatesSubtitle">
+          <property name="text">
+           <string>Select templates from loaded sources to edit. Changes will be saved as new manual templates.</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item>
+           <widget class="QLabel" name="filterLabel">
+            <property name="text">
+             <string>Filter:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="editFilterLineEdit">
+            <property name="placeholderText">
+             <string>Search templates by title or image...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="refreshEditListButton">
+            <property name="text">
+             <string>Refresh List</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item>
+           <widget class="QLabel" name="sourceFilterLabel">
+            <property name="text">
+             <string>Source:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="sourceFilterComboBox">
+            <item>
+             <property name="text">
+              <string>All Sources</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QListWidget" name="editTemplatesListWidget">
+          <property name="minimumHeight">
+           <number>300</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item>
+           <widget class="QPushButton" name="editSelectedTemplateButton">
+            <property name="text">
+             <string>Edit Selected Template</string>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="cloneTemplateButton">
+            <property name="text">
+             <string>Clone Template</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="viewJsonButton">
+            <property name="text">
+             <string>View JSON</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- TAB 4: PREVIEW -->
+      <widget class="QWidget" name="previewTab">
+       <attribute name="title">
+        <string>Preview</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="previewLayout">
+        <item>
+         <widget class="QGroupBox" name="summaryGroup">
+          <property name="title">
+           <string>Processing Summary</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <item>
+            <widget class="QTextEdit" name="summaryTextEdit">
+             <property name="minimumHeight">
+              <number>150</number>
+             </property>
+             <property name="maximumHeight">
+              <number>200</number>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="generateButton">
+          <property name="text">
+           <string>Generate Final Template →</string>
+          </property>
+          <property name="minimumHeight">
+           <number>40</number>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="previewGroup">
+          <property name="title">
+           <string>Generated Template Preview</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <item>
+            <widget class="QTextEdit" name="previewTextEdit">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="font">
+              <font>
+               <family>Monospace</family>
+              </font>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- TAB 5: SAVE -->
+      <widget class="QWidget" name="saveTab">
+       <attribute name="title">
+        <string>Save</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="saveLayout">
+        <item>
+                      <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="saveLocationGroup">
+          <property name="title">
+           <string>Save Location</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <item>
+            <layout class="QHBoxLayout">
+             <item>
+              <widget class="QLineEdit" name="savePathLineEdit">
+               <property name="text">
+                <string>templates.json</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="browseButton">
+               <property name="text">
+                <string>Browse</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="saveButton">
+          <property name="text">
+           <string>Save Template File</string>
+          </property>
+          <property name="minimumHeight">
+           <number>40</number>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="saveStatusLabel">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+                      <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1400</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
