@@ -20,7 +20,7 @@
     "preserve_source_order": false
   },
   "ui_settings": {
-    "theme": "System",
+    "theme": "light",
     "color_theme": "blue",
     "window_size": "1000x750"
   }
